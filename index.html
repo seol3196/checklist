@@ -779,7 +779,7 @@
                         ct: item.created_at,
                         ut: item.updated_at,
                         t: item.completion_times || Array(item.student_count).fill(null),
-                        isDeadline: false // 서버에 아직 컬럼이 없으므로 항상 false로 설정
+                        isDeadline: item.is_deadline || false // 서버의 is_deadline 필드 사용
                     }));
                     
                     console.log('Processed checklists:', checklists);
@@ -823,8 +823,8 @@
                     statuses: checklist.s,
                     completion_times: checklist.t || Array(checklist.sc).fill(null),
                     created_at: checklist.ct,
-                    updated_at: new Date().toISOString()
-                    // is_deadline 필드는 아직 데이터베이스에 추가되지 않았으므로 잠시 제외
+                    updated_at: new Date().toISOString(),
+                    is_deadline: checklist.isDeadline // is_deadline 필드 추가
                 };
 
                 console.log('Saving to Supabase:', checklistData);
@@ -874,7 +874,7 @@
                 ut: now,
                 t: Array(studentCount).fill(null),
                 student_names: students.map(s => s.student_name),
-                isDeadline: false // 마감 상태 필드 추가 (기본값: 마감 전)
+                isDeadline: false // 기본값: 마감 전
             };
 
             checklists.unshift(checklist);
@@ -1304,15 +1304,15 @@
 
             const checklist = checklists.find(c => c.id === checklistId);
             if (checklist) {
-                // 클라이언트 측에서만 상태 변경
+                // 상태 변경
                 checklist.isDeadline = !checklist.isDeadline;
                 checklist.ut = new Date().toISOString();
                 
                 try {
                     showSyncStatus('syncing', '마감 상태 변경 중...');
-                    // 서버에는 마감 상태를 저장하지 않음 (데이터베이스에 컬럼이 추가된 후 활성화)
-                    // await saveChecklistToSupabase(checklist);
-                    showSyncStatus('success', checklist.isDeadline ? '마감 완료 (로컬 저장)' : '마감 해제 (로컬 저장)');
+                    // 서버에 마감 상태 저장
+                    await saveChecklistToSupabase(checklist);
+                    showSyncStatus('success', checklist.isDeadline ? '마감 완료' : '마감 해제');
                     setTimeout(() => hideSyncStatus(), 1000);
                     
                     renderChecklistContent(checklist);
