@@ -263,9 +263,9 @@
             </div>
         </div>
         
-        <div id="mainContainer" class="flex gap-4">
+        <div class="flex gap-4">
             <!-- 좌측 체크리스트 목록 -->
-            <div id="leftContainer" class="w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <h2 class="text-xl font-bold mb-4 dark:text-gray-100">Checklist</h2>
                 
                 <!-- 학생 관리 섹션 -->
@@ -341,7 +341,7 @@
             </div>
 
             <!-- 우측 체크리스트 내용 -->
-            <div id="rightContainer" class="w-3/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+            <div class="w-3/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                 <div id="noConnection" class="text-center py-8 text-gray-500 dark:text-gray-400">
                     <div class="text-4xl mb-4">👨‍🏫</div>
                     <div class="text-lg font-semibold mb-2">교사 로그인이 필요합니다</div>
@@ -377,17 +377,11 @@
                             </div>
                             <div id="checklistInfo" class="text-sm text-gray-400 dark:text-gray-500 mt-1"></div>
                         </div>
-                        <div class="flex">
-                            <button id="fullscreenBtn" onclick="toggleFullscreen()" 
-                                    class="icon-btn mr-2 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900" title="전체화면">
-                                🔍
+                        <div id="checklistActions" class="hidden">
+                            <button onclick="deleteCurrentChecklist()" 
+                                    class="icon-btn text-red-500 hover:bg-red-100 dark:hover:bg-red-900">
+                                🗑️
                             </button>
-                            <div id="checklistActions" class="hidden">
-                                <button onclick="deleteCurrentChecklist()" 
-                                        class="icon-btn text-red-500 hover:bg-red-100 dark:hover:bg-red-900">
-                                    🗑️
-                                </button>
-                            </div>
                         </div>
                     </div>
                     
@@ -462,61 +456,6 @@
             RESUBMIT: { id: 3, color: 'bg-orange-500', text: '재제출' },
             DEADLINE_PASSED: { id: 4, color: 'bg-red-500', text: '미제출마감' }
         };
-
-        // 전체화면 관련 변수
-        let isFullscreen = false;
-        let originalLayout = {};
-
-        // 전체화면 토글 함수
-        function toggleFullscreen() {
-            const checklistContainer = document.getElementById('rightContainer');
-            const leftContainer = document.getElementById('leftContainer');
-            const mainContainer = document.getElementById('mainContainer');
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            
-            // 요소가 존재하는지 확인
-            if (!checklistContainer || !leftContainer || !mainContainer || !fullscreenBtn) {
-                console.error("전체화면 전환에 필요한 요소를 찾을 수 없습니다.");
-                return; // 필요한 요소가 없으면 함수 실행 중단
-            }
-            
-            if (!isFullscreen) {
-                // 원래 레이아웃 저장
-                originalLayout = {
-                    checklistClassName: checklistContainer.className,
-                    leftClassName: leftContainer.className,
-                    mainClassName: mainContainer.className
-                };
-                
-                // 전체화면 스타일 적용
-                checklistContainer.className = 'w-full bg-white dark:bg-gray-800 rounded-lg shadow p-4';
-                leftContainer.style.display = 'none';
-                mainContainer.className = 'flex flex-col';
-                fullscreenBtn.innerHTML = '⬅️';
-                fullscreenBtn.title = '전체화면 해제';
-                
-                isFullscreen = true;
-            } else {
-                // 원래 레이아웃으로 복원
-                checklistContainer.className = originalLayout.checklistClassName || 'w-3/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4';
-                leftContainer.className = originalLayout.leftClassName || 'w-1/4 bg-white dark:bg-gray-800 rounded-lg shadow p-4';
-                leftContainer.style.display = '';
-                mainContainer.className = originalLayout.mainClassName || 'flex gap-4';
-                fullscreenBtn.innerHTML = '🔍';
-                fullscreenBtn.title = '전체화면';
-                
-                isFullscreen = false;
-            }
-            
-            // 현재 체크리스트 다시 렌더링 (레이아웃 변경 후 UI 업데이트)
-            if (currentChecklistId) {
-                const checklist = checklists.find(c => c.id === currentChecklistId);
-                if (checklist) {
-                    renderChecklistContent(checklist);
-                    updateStatistics(checklist);
-                }
-            }
-        }
 
         // 고정된 Supabase 설정
         const SUPABASE_CONFIG = {
@@ -1357,10 +1296,6 @@
                     🗑️
                 </button>
             `;
-
-            // 전체화면 버튼의 상태를 유지
-            document.getElementById('fullscreenBtn').innerHTML = isFullscreen ? '⬅️' : '🔍';
-            document.getElementById('fullscreenBtn').title = isFullscreen ? '전체화면 해제' : '전체화면';
         }
 
         // 마감 상태 토글 함수
