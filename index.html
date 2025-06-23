@@ -154,6 +154,50 @@
                 gap: 8px;
             }
         }
+        /* 전체화면 모드 스타일 */
+        .fullscreen-mode .student-card {
+            min-width: 110px; /* 100px에서 110px로 증가 */
+        }
+        .fullscreen-mode .student-number {
+            font-size: 1.32rem; /* 1.2rem에서 1.32rem으로 증가 */
+            padding: 14px 18px; /* 12px 16px에서 증가 */
+            min-height: 55px; /* 50px에서 55px로 증가 */
+        }
+        .fullscreen-mode .status-btn {
+            min-height: 110px; /* 100px에서 110px로 증가 */
+            font-size: 1.32rem; /* 1.2rem에서 1.32rem으로 증가 */
+            font-weight: 700;
+        }
+        .fullscreen-mode .ranking-badge {
+            width: 33px; /* 30px에서 33px로 증가 */
+            height: 33px; /* 30px에서 33px로 증가 */
+            font-size: 1rem; /* 0.9rem에서 1rem으로 증가 */
+            top: -11px;
+            right: -11px;
+        }
+        .fullscreen-mode .student-grid {
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); /* 130px에서 145px로 증가 */
+            gap: 22px; /* 20px에서 22px로 증가 */
+            padding: 18px; /* 16px에서 18px로 증가 */
+        }
+        .fullscreen-mode .icon-btn {
+            font-size: 1.55rem; /* 1.4rem에서 1.55rem으로 증가 */
+            padding: 12px; /* 10px에서 12px로 증가 */
+        }
+        .fullscreen-mode #checklistTitle {
+            font-size: 2rem; /* 1.8rem에서 2rem으로 증가 */
+        }
+        .fullscreen-mode #editCategorySelect {
+            font-size: 1.32rem; /* 1.2rem에서 1.32rem으로 증가 */
+            padding: 9px 14px; /* 8px 12px에서 증가 */
+        }
+        /* 통계 섹션도 크게 */
+        .fullscreen-mode #statistics h3 {
+            font-size: 1.32rem;
+        }
+        .fullscreen-mode #statistics .text-sm {
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
@@ -554,6 +598,9 @@
                 fullscreenBtn.innerHTML = '⬅️';
                 fullscreenBtn.title = '전체화면 해제';
                 
+                // 폰트 및 버튼 크기 키우기
+                checklistContainer.classList.add('fullscreen-mode');
+                
                 isFullscreen = true;
             } else {
                 // 원래 레이아웃으로 복원
@@ -563,6 +610,9 @@
                 mainContainer.className = originalLayout.mainClassName || 'flex gap-4';
                 fullscreenBtn.innerHTML = '🔍';
                 fullscreenBtn.title = '전체화면';
+                
+                // 폰트 및 버튼 크기 원복
+                checklistContainer.classList.remove('fullscreen-mode');
                 
                 isFullscreen = false;
             }
