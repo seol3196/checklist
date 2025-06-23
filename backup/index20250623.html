@@ -244,28 +244,8 @@
                     <h3 class="text-sm font-semibold text-purple-800 dark:text-purple-200 mb-2">모둠 정보 입력</h3>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1 dark:text-gray-300">모둠 개수</label>
-                        <input type="number" id="groupCountInput" min="1" max="20" value="6" 
+                        <input type="number" id="groupCountInput" min="1" max="20" value="4" 
                             class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1 dark:text-gray-300">카테고리 선택</label>
-                        <select id="groupCategorySelect" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            <option value="일반">🗒️ 일반</option>
-                            <option value="국어">📒 국어</option>
-                            <option value="수학">🧮 수학</option>
-                            <option value="사회">👥 사회</option>
-                            <option value="과학">🔬 과학</option>
-                            <option value="영어">🇺🇸 영어</option>
-                            <option value="도덕">🤝 도덕</option>
-                            <option value="실과">🧶 실과</option>
-                            <option value="음악">🎵 음악</option>
-                            <option value="미술">🎨 미술</option>
-                            <option value="체육">🏃 체육</option>
-                            <option value="창체">👥 창체</option>
-                            <option value="아침활동">🌞 아침활동</option>
-                            <option value="독서">🤓 독서</option>
-                            <option value="기타">🤔 기타</option>
-                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 dark:text-gray-300">체크리스트 이름</label>
@@ -365,6 +345,7 @@
                         <option value="아침활동">🌞 아침활동</option>
                         <option value="독서">🤓 독서</option>
                         <option value="기타">🤔 기타</option>
+                        <option value="모둠">👨‍👩‍👧‍👦 모둠</option>
                     </select>
                     <button id="createChecklist" 
                             class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed mb-2"
@@ -459,35 +440,35 @@
                             <div class="text-center">
                                 <div class="bg-green-500 text-white p-2 rounded mb-1">완료</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="completedCount">0</span><span id="unitText">명</span>
+                                    <span id="completedCount">0</span>명
                                     (<span id="completedPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-yellow-500 text-white p-2 rounded mb-1">진행중</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="inProgressCount">0</span><span id="unitText2">명</span>
+                                    <span id="inProgressCount">0</span>명
                                     (<span id="inProgressPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-orange-500 text-white p-2 rounded mb-1">재제출</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="resubmitCount">0</span><span id="unitText3">명</span>
+                                    <span id="resubmitCount">0</span>명
                                     (<span id="resubmitPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gray-500 text-white p-2 rounded mb-1">미완료</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="incompleteCount">0</span><span id="unitText4">명</span>
+                                    <span id="incompleteCount">0</span>명
                                     (<span id="incompletePercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-red-500 text-white p-2 rounded mb-1">미제출마감</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="deadlineCount">0</span><span id="unitText5">명</span>
+                                    <span id="deadlineCount">0</span>명
                                     (<span id="deadlinePercent">0.0</span>%)
                                 </div>
                             </div>
@@ -595,10 +576,11 @@
 
         // 로컬 스토리지 키
         const STORAGE_KEYS = {
-            TEACHER_ID: 'teacherId',
-            LAST_VIEWED: 'lastViewedChecklist',
             DARK_MODE: 'darkMode',
-            STUDENT_COUNT: 'studentCount'
+            STUDENT_COUNT: 'studentCount',
+            LAST_VIEWED: 'lastViewedChecklist',
+            USER_ID: 'userId',
+            TEACHER_ID: 'teacherId'
         };
 
         // 상태 ID를 텍스트로 변환하는 함수
@@ -607,9 +589,9 @@
         }
 
         // 사용자 ID 생성
-        // function generateUserId() {
-        //     return 'default_user';
-        // }
+        function generateUserId() {
+            return 'default_user';
+        }
 
         // 동기화 상태 표시
         function showSyncStatus(type, message) {
@@ -626,17 +608,19 @@
         // 완전 로그아웃 및 초기화
         function resetUserId() {
             if (confirm('로그아웃 하시겠습니까?\n저장된 모든 정보가 삭제됩니다.')) {
-                // localStorage.removeItem(STORAGE_KEYS.USER_ID); // 제거
+                localStorage.removeItem(STORAGE_KEYS.USER_ID);
                 localStorage.removeItem(STORAGE_KEYS.TEACHER_ID);
                 localStorage.removeItem(STORAGE_KEYS.LAST_VIEWED);
                 // localStorage.removeItem(STORAGE_KEYS.STUDENT_COUNT); // 이제 사용되지 않음
+                
                 // 전역 변수 초기화
                 teacherId = null;
-                // userId = null; // 제거
+                userId = null;
                 checklists = [];
                 currentChecklistId = null;
-                students = [];
-                uploadedStudents = [];
+                students = []; // 학생 데이터도 초기화
+                uploadedStudents = []; // 업로드된 임시 학생 데이터도 초기화
+                
                 alert('로그아웃되었습니다. 페이지를 새로고침합니다.');
                 location.reload();
             }
@@ -709,9 +693,12 @@
                 localStorage.setItem(STORAGE_KEYS.TEACHER_ID, inputTeacherId);
                 teacherId = inputTeacherId;
                 
-                // userId 관련 코드 모두 제거
+                userId = localStorage.getItem(STORAGE_KEYS.USER_ID) || generateUserId();
+                localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+
                 console.log('✅ 로컬스토리지 저장 완료:', {
-                    teacherId: localStorage.getItem(STORAGE_KEYS.TEACHER_ID)
+                    teacherId: localStorage.getItem(STORAGE_KEYS.TEACHER_ID),
+                    userId: localStorage.getItem(STORAGE_KEYS.USER_ID)
                 });
 
                 // UI 업데이트
@@ -766,43 +753,62 @@
                 console.log('🔍 document.readyState:', document.readyState);
                 console.log('🔍 window.supabase 상태:', !!window.supabase);
                 console.log('🔍 SUPABASE_CONFIG 상태:', SUPABASE_CONFIG);
+
+                if (!window.supabase) {
+                    throw new Error('Supabase 클라이언트가 로드되지 않았습니다.');
+                }
+
                 console.log('🔍 localStorage 전체 내용:', {
                     teacherId: localStorage.getItem(STORAGE_KEYS.TEACHER_ID),
+                    userId: localStorage.getItem(STORAGE_KEYS.USER_ID),
                     lastViewed: localStorage.getItem(STORAGE_KEYS.LAST_VIEWED),
                     darkMode: localStorage.getItem(STORAGE_KEYS.DARK_MODE)
                 });
+
                 const savedTeacherId = localStorage.getItem(STORAGE_KEYS.TEACHER_ID);
                 console.log('🔍 저장된 교사 ID:', savedTeacherId);
                 console.log('🔍 저장된 교사 ID 타입:', typeof savedTeacherId);
                 console.log('🔍 저장된 교사 ID 길이:', savedTeacherId ? savedTeacherId.length : 0);
+
                 // 고정된 Supabase 설정으로 클라이언트 생성
                 supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
                 console.log('🔍 Supabase 클라이언트 생성됨');
+
                 if (savedTeacherId && savedTeacherId.trim() !== '') {
                     console.log('✅ 자동 로그인 시도 - 저장된 교사 ID 발견');
+                    
                     // 교사 ID가 저장되어 있으면 바로 로그인 처리
                     teacherId = savedTeacherId;
-                    // userId 관련 코드 모두 제거
+                    userId = localStorage.getItem(STORAGE_KEYS.USER_ID) || generateUserId();
+                    localStorage.setItem(STORAGE_KEYS.USER_ID, userId);
+                    
                     console.log('🔍 로그인 정보:', {
                         teacherId,
-                        savedTeacherId
+                        userId,
+                        savedTeacherId,
+                        savedUserId: localStorage.getItem(STORAGE_KEYS.USER_ID)
                     });
+                    
                     // UI 즉시 업데이트
                     document.getElementById('configModal').style.display = 'none';
                     document.getElementById('noConnection').classList.add('hidden');
                     document.getElementById('mainContent').classList.remove('hidden');
+                    
                     // 교사 정보 표시
                     document.getElementById('teacherInfo').textContent = `👨‍🏫 ${teacherId}`;
+                    
                     // 데이터 로드 시도
                     try {
                         console.log('🔍 체크리스트 로드 시도');
                         showSyncStatus('syncing', '자동 로그인 중...');
                         await loadChecklists();
                         console.log('✅ 체크리스트 로드 성공');
+                        
                         // 학생 데이터도 로드
                         console.log('🔍 학생 데이터 로드 시도');
                         await loadStudents();
                         console.log('✅ 학생 데이터 로드 성공');
+                        
                         showSyncStatus('success', `${teacherId}님 환영합니다! (자동 로그인)`);
                         setTimeout(() => hideSyncStatus(), 3000);
                     } catch (error) {
@@ -843,12 +849,13 @@
             try {
                 showSyncStatus('syncing', '데이터 로드 중...');
                 
-                console.log('Loading checklists for teacher:', teacherId);
+                console.log('Loading checklists for teacher:', teacherId, 'user:', userId);
                 
                 const { data, error } = await supabase
                     .from('checklists')
                     .select('*')
                     .eq('teacher_id', teacherId)
+                    .eq('user_id', userId)
                     .order('created_at', { ascending: false });
 
                 console.log('Supabase response:', { data, error });
@@ -873,8 +880,8 @@
                         ct: item.created_at,
                         ut: item.updated_at,
                         t: item.completion_times || Array(item.student_count).fill(null),
-                        isDeadline: item.is_deadline || false,
-                        isGroupChecklist: item.is_group_checklist || false // 모둠 체크리스트 여부
+                        isDeadline: item.is_deadline || false // 서버의 is_deadline 필드 사용
+                        // isGroupChecklist 필드 제거 - 대신 category로 구분
                     }));
                     
                     console.log('Processed checklists:', checklists);
@@ -910,6 +917,7 @@
             try {
                 const checklistData = {
                     id: checklist.id,
+                    user_id: userId,
                     teacher_id: teacherId,
                     name: checklist.n,
                     category: checklist.c,
@@ -918,8 +926,8 @@
                     completion_times: checklist.t || Array(checklist.sc).fill(null),
                     created_at: checklist.ct,
                     updated_at: new Date().toISOString(),
-                    is_deadline: checklist.isDeadline,
-                    is_group_checklist: checklist.isGroupChecklist // is_group_checklist 필드 추가
+                    is_deadline: checklist.isDeadline // is_deadline 필드 추가
+                    // is_group_checklist 필드 제거
                 };
 
                 console.log('Saving to Supabase:', checklistData);
@@ -969,8 +977,7 @@
                 ut: now,
                 t: Array(studentCount).fill(null),
                 student_names: students.map(s => s.student_name),
-                isDeadline: false, // 기본값: 마감 전
-                isGroupChecklist: false // 일반 체크리스트
+                isDeadline: false // 기본값: 마감 전
             };
 
             checklists.unshift(checklist);
@@ -1049,10 +1056,6 @@
                 const deadlineIcon = checklist.isDeadline ? 
                     '<span title="마감됨" class="text-xs mr-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 px-1.5 py-0.5 rounded-full">🔒</span>' : 
                     '';
-                // 모둠 체크리스트일 경우 아이콘 추가
-                const groupIcon = checklist.isGroupChecklist ? 
-                    '<span title="모둠 체크리스트" class="text-xs mr-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 px-1.5 py-0.5 rounded-full">👨‍👩‍👧‍👦</span>' : 
-                    '';
                 return `
                 <div class="checklist-item flex items-center p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 ${currentChecklistId === checklist.id ? 'bg-blue-100 dark:bg-blue-900' : ''} dark:bg-gray-700 dark:hover:bg-gray-600"
                      onclick="selectChecklist(${checklist.id})"
@@ -1060,7 +1063,7 @@
                     <div class="flex-1 flex items-center gap-2 min-w-0">
                         <span class="flex-shrink-0 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${checklist.c}</span>
                         <span class="truncate dark:text-gray-100 flex-1 min-w-0" title="${checklist.n}">
-                            ${deadlineIcon}${groupIcon}${truncatedTitle}
+                            ${deadlineIcon}${truncatedTitle}
                         </span>
                     </div>
                 </div>
@@ -1151,10 +1154,6 @@
                 checklist.c = newCategory;
                 checklist.ut = new Date().toISOString();
                 
-                // 즉시 UI 업데이트 추가
-                renderChecklistContent(checklist);
-                updateStatistics(checklist);
-                
                 try {
                     showSyncStatus('syncing', '저장 중...');
                     await saveChecklistToSupabase(checklist);
@@ -1183,7 +1182,8 @@
                         .from('checklists')
                         .delete()
                         .eq('id', currentChecklistId)
-                        .eq('teacher_id', teacherId);
+                        .eq('teacher_id', teacherId)
+                        .eq('user_id', userId);
                     
                     if (error) throw error;
                     
@@ -1274,12 +1274,6 @@
                 counts[statusId]++;
             });
 
-            // 모둠 체크리스트 여부에 따라 단위 설정
-            const unitText = checklist.isGroupChecklist ? '모둠' : '명';
-            document.querySelectorAll('[id^="unitText"]').forEach(el => {
-                el.textContent = unitText;
-            });
-
             const statusMapping = {
                 0: { countId: 'incompleteCount', percentId: 'incompletePercent', barId: 'incompleteBar' },
                 1: { countId: 'completedCount', percentId: 'completedPercent', barId: 'completedBar' },
@@ -1312,7 +1306,7 @@
 
             if (completionOrder.length > 0) {
                 // 모둠 체크리스트인지 확인
-                const isGroupChecklist = checklist.isGroupChecklist;
+                const isGroupChecklist = checklist.c === '모둠';
                 
                 const rankingHtml = `
                     <div class="ranking-section mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -1364,10 +1358,14 @@
         function renderChecklistContent(checklist) {
             const contentContainer = document.getElementById('checklistContent');
             
-            // 모둠 체크리스트 여부를 isGroupChecklist로만 판단
-            if (checklist.isGroupChecklist) {
+            // 모둠 체크리스트인지 카테고리로만 확인
+            const isGroupChecklist = checklist.c === '모둠';
+            
+            if (isGroupChecklist) {
+                // 모둠 체크리스트 렌더링
                 renderGroupChecklistContent(checklist, contentContainer);
             } else {
+                // 학생 체크리스트 렌더링 (기존 로직)
                 renderStudentChecklistContent(checklist, contentContainer);
             }
             
@@ -1400,10 +1398,9 @@
         function renderStudentChecklistContent(checklist, contentContainer) {
             // 완료 순위 계산
             const rankings = getCompletionRanking(checklist);
-            // 체크리스트의 학생 수와 실제 등록된 학생 수가 다른 경우 처리
-            const maxStudents = Math.min(students.length, checklist.s.length);
+            
             // 학생 목록이 없으면 메시지 표시
-            if (maxStudents === 0) {
+            if (students.length === 0) {
                 contentContainer.innerHTML = `
                     <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                         <div class="text-3xl mb-4">🤷‍♂️</div>
@@ -1413,15 +1410,13 @@
                 `;
                 return;
             }
-            contentContainer.innerHTML = students.slice(0, maxStudents).map((student, index) => {
+
+            contentContainer.innerHTML = students.map((student, index) => {
                 const status = getStatusById(checklist.s[index]);
-                if (!status) {
-                    console.warn(`Invalid status ID: ${checklist.s[index]} at index ${index}`);
-                    return '';
-                }
                 const ranking = rankings[index];
                 const studentNumber = student.student_number;
                 const studentName = student.student_name;
+
                 return `
                     <div class="student-card bg-white dark:bg-gray-700 rounded-lg shadow-md relative">
                         ${ranking ? `<div class="ranking-badge">${ranking}</div>` : ''}
@@ -1927,7 +1922,7 @@
         // 모둠 체크리스트 모달 표시
         function showGroupChecklistModal() {
             document.getElementById('groupChecklistModal').classList.remove('hidden');
-            document.getElementById('groupCountInput').value = '6';
+            document.getElementById('groupCountInput').value = '4';
             document.getElementById('groupChecklistName').value = '';
             setTimeout(() => {
                 document.getElementById('groupChecklistName').focus();
@@ -1948,7 +1943,6 @@
 
             const groupCount = parseInt(document.getElementById('groupCountInput').value);
             const checklistName = document.getElementById('groupChecklistName').value.trim() || `모둠 체크리스트 ${checklists.length + 1}`;
-            const category = document.getElementById('groupCategorySelect').value; // 모둠 전용 카테고리 선택기 사용
             
             if (groupCount <= 0 || groupCount > 20) {
                 alert('모둠 개수는 1~20개 사이로 입력해주세요.');
@@ -1959,14 +1953,14 @@
             const checklist = {
                 id: Date.now(),
                 n: checklistName,
-                c: category, // 선택한 카테고리 사용
+                c: '모둠', // 카테고리를 '모둠'으로 설정
                 sc: groupCount, // 모둠 개수
                 s: Array(groupCount).fill(0),
                 ct: now,
                 ut: now,
                 t: Array(groupCount).fill(null),
-                isDeadline: false,
-                isGroupChecklist: true // 모둠 체크리스트 표시
+                isDeadline: false
+                // isGroupChecklist 필드 제거 - category로 구분
             };
 
             checklists.unshift(checklist);

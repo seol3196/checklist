@@ -247,26 +247,6 @@
                         <input type="number" id="groupCountInput" min="1" max="20" value="6" 
                             class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     </div>
-                    <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1 dark:text-gray-300">카테고리 선택</label>
-                        <select id="groupCategorySelect" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                            <option value="일반">🗒️ 일반</option>
-                            <option value="국어">📒 국어</option>
-                            <option value="수학">🧮 수학</option>
-                            <option value="사회">👥 사회</option>
-                            <option value="과학">🔬 과학</option>
-                            <option value="영어">🇺🇸 영어</option>
-                            <option value="도덕">🤝 도덕</option>
-                            <option value="실과">🧶 실과</option>
-                            <option value="음악">🎵 음악</option>
-                            <option value="미술">🎨 미술</option>
-                            <option value="체육">🏃 체육</option>
-                            <option value="창체">👥 창체</option>
-                            <option value="아침활동">🌞 아침활동</option>
-                            <option value="독서">🤓 독서</option>
-                            <option value="기타">🤔 기타</option>
-                        </select>
-                    </div>
                     <div>
                         <label class="block text-sm font-medium mb-1 dark:text-gray-300">체크리스트 이름</label>
                         <input type="text" id="groupChecklistName" placeholder="모둠 활동 체크리스트" 
@@ -365,6 +345,7 @@
                         <option value="아침활동">🌞 아침활동</option>
                         <option value="독서">🤓 독서</option>
                         <option value="기타">🤔 기타</option>
+                        <option value="모둠">👨‍👩‍👧‍👦 모둠</option>
                     </select>
                     <button id="createChecklist" 
                             class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center justify-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed mb-2"
@@ -429,6 +410,7 @@
                                     <option value="아침활동">🌞 아침활동</option>
                                     <option value="독서">🤓 독서</option>
                                     <option value="기타">🤔 기타</option>
+                                    <option value="모둠">👨‍👩‍👧‍👦 모둠</option>
                                 </select>
                                 <input type="text" id="checklistTitle" 
                                        class="flex-1 text-xl font-bold bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none px-1 dark:text-gray-100 dark:border-gray-600" 
@@ -459,35 +441,35 @@
                             <div class="text-center">
                                 <div class="bg-green-500 text-white p-2 rounded mb-1">완료</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="completedCount">0</span><span id="unitText">명</span>
+                                    <span id="completedCount">0</span>명
                                     (<span id="completedPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-yellow-500 text-white p-2 rounded mb-1">진행중</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="inProgressCount">0</span><span id="unitText2">명</span>
+                                    <span id="inProgressCount">0</span>명
                                     (<span id="inProgressPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-orange-500 text-white p-2 rounded mb-1">재제출</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="resubmitCount">0</span><span id="unitText3">명</span>
+                                    <span id="resubmitCount">0</span>명
                                     (<span id="resubmitPercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gray-500 text-white p-2 rounded mb-1">미완료</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="incompleteCount">0</span><span id="unitText4">명</span>
+                                    <span id="incompleteCount">0</span>명
                                     (<span id="incompletePercent">0.0</span>%)
                                 </div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-red-500 text-white p-2 rounded mb-1">미제출마감</div>
                                 <div class="text-sm dark:text-gray-100">
-                                    <span id="deadlineCount">0</span><span id="unitText5">명</span>
+                                    <span id="deadlineCount">0</span>명
                                     (<span id="deadlinePercent">0.0</span>%)
                                 </div>
                             </div>
@@ -873,8 +855,8 @@
                         ct: item.created_at,
                         ut: item.updated_at,
                         t: item.completion_times || Array(item.student_count).fill(null),
-                        isDeadline: item.is_deadline || false,
-                        isGroupChecklist: item.is_group_checklist || false // 모둠 체크리스트 여부
+                        isDeadline: item.is_deadline || false // 서버의 is_deadline 필드 사용
+                        // isGroupChecklist 필드 제거 - 대신 category로 구분
                     }));
                     
                     console.log('Processed checklists:', checklists);
@@ -918,8 +900,8 @@
                     completion_times: checklist.t || Array(checklist.sc).fill(null),
                     created_at: checklist.ct,
                     updated_at: new Date().toISOString(),
-                    is_deadline: checklist.isDeadline,
-                    is_group_checklist: checklist.isGroupChecklist // is_group_checklist 필드 추가
+                    is_deadline: checklist.isDeadline // is_deadline 필드 추가
+                    // is_group_checklist 필드 제거
                 };
 
                 console.log('Saving to Supabase:', checklistData);
@@ -969,8 +951,7 @@
                 ut: now,
                 t: Array(studentCount).fill(null),
                 student_names: students.map(s => s.student_name),
-                isDeadline: false, // 기본값: 마감 전
-                isGroupChecklist: false // 일반 체크리스트
+                isDeadline: false // 기본값: 마감 전
             };
 
             checklists.unshift(checklist);
@@ -1049,10 +1030,6 @@
                 const deadlineIcon = checklist.isDeadline ? 
                     '<span title="마감됨" class="text-xs mr-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 px-1.5 py-0.5 rounded-full">🔒</span>' : 
                     '';
-                // 모둠 체크리스트일 경우 아이콘 추가
-                const groupIcon = checklist.isGroupChecklist ? 
-                    '<span title="모둠 체크리스트" class="text-xs mr-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 px-1.5 py-0.5 rounded-full">👨‍👩‍👧‍👦</span>' : 
-                    '';
                 return `
                 <div class="checklist-item flex items-center p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 ${currentChecklistId === checklist.id ? 'bg-blue-100 dark:bg-blue-900' : ''} dark:bg-gray-700 dark:hover:bg-gray-600"
                      onclick="selectChecklist(${checklist.id})"
@@ -1060,7 +1037,7 @@
                     <div class="flex-1 flex items-center gap-2 min-w-0">
                         <span class="flex-shrink-0 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300">${checklist.c}</span>
                         <span class="truncate dark:text-gray-100 flex-1 min-w-0" title="${checklist.n}">
-                            ${deadlineIcon}${groupIcon}${truncatedTitle}
+                            ${deadlineIcon}${truncatedTitle}
                         </span>
                     </div>
                 </div>
@@ -1274,12 +1251,6 @@
                 counts[statusId]++;
             });
 
-            // 모둠 체크리스트 여부에 따라 단위 설정
-            const unitText = checklist.isGroupChecklist ? '모둠' : '명';
-            document.querySelectorAll('[id^="unitText"]').forEach(el => {
-                el.textContent = unitText;
-            });
-
             const statusMapping = {
                 0: { countId: 'incompleteCount', percentId: 'incompletePercent', barId: 'incompleteBar' },
                 1: { countId: 'completedCount', percentId: 'completedPercent', barId: 'completedBar' },
@@ -1312,7 +1283,7 @@
 
             if (completionOrder.length > 0) {
                 // 모둠 체크리스트인지 확인
-                const isGroupChecklist = checklist.isGroupChecklist;
+                const isGroupChecklist = checklist.c === '모둠';
                 
                 const rankingHtml = `
                     <div class="ranking-section mt-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -1364,8 +1335,10 @@
         function renderChecklistContent(checklist) {
             const contentContainer = document.getElementById('checklistContent');
             
-            // 모둠 체크리스트 여부를 isGroupChecklist로만 판단
-            if (checklist.isGroupChecklist) {
+            // 모둠 체크리스트인지 카테고리로만 확인 (명확하게 보장)
+            const currentCategory = document.getElementById('editCategorySelect')?.value || checklist.c;
+            const isGroupChecklist = String(currentCategory).trim() === '모둠';
+            if (isGroupChecklist) {
                 renderGroupChecklistContent(checklist, contentContainer);
             } else {
                 renderStudentChecklistContent(checklist, contentContainer);
@@ -1948,7 +1921,6 @@
 
             const groupCount = parseInt(document.getElementById('groupCountInput').value);
             const checklistName = document.getElementById('groupChecklistName').value.trim() || `모둠 체크리스트 ${checklists.length + 1}`;
-            const category = document.getElementById('groupCategorySelect').value; // 모둠 전용 카테고리 선택기 사용
             
             if (groupCount <= 0 || groupCount > 20) {
                 alert('모둠 개수는 1~20개 사이로 입력해주세요.');
@@ -1959,14 +1931,14 @@
             const checklist = {
                 id: Date.now(),
                 n: checklistName,
-                c: category, // 선택한 카테고리 사용
+                c: '모둠', // 카테고리를 '모둠'으로 설정
                 sc: groupCount, // 모둠 개수
                 s: Array(groupCount).fill(0),
                 ct: now,
                 ut: now,
                 t: Array(groupCount).fill(null),
-                isDeadline: false,
-                isGroupChecklist: true // 모둠 체크리스트 표시
+                isDeadline: false
+                // isGroupChecklist 필드 제거 - category로 구분
             };
 
             checklists.unshift(checklist);

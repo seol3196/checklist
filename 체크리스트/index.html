@@ -1,0 +1,49 @@
+function renderStudentChecklistContent(checklist, contentContainer) {
+    // 완료 순위 계산
+    const rankings = getCompletionRanking(checklist);
+    // 체크리스트의 학생 수와 실제 등록된 학생 수가 다른 경우 처리
+    const maxStudents = Math.min(students.length, checklist.s.length);
+    // 학생 목록이 없으면 메시지 표시
+    if (students.length === 0) {
+        contentContainer.innerHTML = `
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div class="text-3xl mb-4">🤷‍♂️</div>
+                <div class="text-lg font-semibold mb-2">등록된 학생이 없습니다.</div>
+                <div class="text-sm">좌측 "학생 추가" 버튼을 클릭하여 학생 목록을 설정해주세요.</div>
+            </div>
+        `;
+        return;
+    }
+    contentContainer.innerHTML = students.slice(0, maxStudents).map((student, index) => {
+        const status = getStatusById(checklist.s[index]);
+        if (!status) {
+            console.warn(`Invalid status ID: ${checklist.s[index]} at index ${index}`);
+            return '';
+        }
+        const ranking = rankings[index];
+        const studentNumber = student.student_number;
+        const studentName = student.student_name;
+        return `
+            <div class="student-card bg-white dark:bg-gray-700 rounded-lg shadow-md relative">
+                ${ranking ? `<div class="ranking-badge">${ranking}</div>` : ''}
+                <div class="student-number" title="${studentName}">
+                    ${studentNumber}번 <br> ${studentName}
+                </div>
+                <button class="status-btn ${status.color} text-white w-full"
+                        onclick="changeStatus(${checklist.id}, ${index})"
+                        title="${studentNumber}번 ${studentName} - ${status.text}">
+                    ${status.text}
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function showGroupChecklistModal() {
+    document.getElementById('groupChecklistModal').classList.remove('hidden');
+    document.getElementById('groupCountInput').value = '6';
+    document.getElementById('groupChecklistName').value = '';
+    setTimeout(() => {
+        document.getElementById('groupChecklistName').focus();
+    }, 100);
+} 
