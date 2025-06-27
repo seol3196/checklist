@@ -227,6 +227,12 @@
                         ID 초기화
                     </button>
                 </div>
+                <!-- 교사 로그인 모달 내에 추가 -->
+                <button onclick="googleLogin()" 
+                        class="flex-1 bg-red-500 text-white p-2 rounded hover:bg-red-600 transition-colors mt-2">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width:20px;display:inline;margin-right:8px;vertical-align:middle;">
+                    구글로 로그인
+                </button>
             </div>
         </div>
     </div>
@@ -1588,13 +1594,22 @@
         }
 
         // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('🔍 DOMContentLoaded 이벤트 발생');
             console.log('🔍 window.supabase 상태:', !!window.supabase);
             console.log('🔍 SUPABASE_CONFIG 상태:', SUPABASE_CONFIG);
             init().catch(error => {
                 console.error('❌ init 함수 실행 중 오류:', error);
             });
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+            }
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                // 이미 로그인된 경우
+                // session.user.email 등으로 사용자 정보 사용 가능
+                // teacherId = session.user.email; 등으로 활용 가능
+            }
         });
 
         // 학생 관련 함수들
@@ -2028,6 +2043,22 @@
                 checklists.shift();
                 renderChecklistList();
             }
+        }
+
+        async function googleLogin() {
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+            }
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.origin // 로그인 후 돌아올 주소
+                }
+            });
+            if (error) {
+                alert('구글 로그인 실패: ' + error.message);
+            }
+            // 로그인 성공 시, Supabase가 자동으로 리다이렉트합니다.
         }
     </script>
 </body>
