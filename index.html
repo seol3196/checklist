@@ -1595,6 +1595,7 @@
 
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', async () => {
+            cleanUpOAuthParams();
             console.log('🔍 DOMContentLoaded 이벤트 발생');
             console.log('🔍 window.supabase 상태:', !!window.supabase);
             console.log('🔍 SUPABASE_CONFIG 상태:', SUPABASE_CONFIG);
@@ -2052,15 +2053,23 @@
             }
             
             try {
+                console.log('🔍 구글 로그인 시작');
                 const { data, error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
-                        redirectTo: 'https://euphonious-pixie-336fea.netlify.app/'
+                        redirectTo: 'https://euphonious-pixie-336fea.netlify.app/',
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent',
+                        }
                     }
                 });
+                
                 if (error) {
                     console.error('구글 로그인 오류:', error);
                     alert('구글 로그인 실패: ' + error.message);
+                } else {
+                    console.log('✅ 구글 로그인 요청 성공:', data);
                 }
             } catch (error) {
                 console.error('구글 로그인 예외:', error);
@@ -2096,6 +2105,13 @@
                 // 체크리스트 및 학생 데이터 로드
                 await loadChecklists();
                 await loadStudents();
+            }
+        }
+
+        function cleanUpOAuthParams() {
+            if (window.location.search.includes('code=') || window.location.search.includes('access_token=')) {
+                // 현재 URL에서 쿼리스트링 제거
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
     </script>
