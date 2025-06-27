@@ -236,7 +236,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- 학생 업로드 모달 -->
     <div id="studentUploadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -1610,6 +1610,7 @@
                 // session.user.email 등으로 사용자 정보 사용 가능
                 // teacherId = session.user.email; 등으로 활용 가능
             }
+            await handleGoogleLoginResult();
         });
 
         // 학생 관련 함수들
@@ -2049,16 +2050,53 @@
             if (!supabase) {
                 supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
             }
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: window.location.origin // 로그인 후 돌아올 주소
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: 'https://euphonious-pixie-336fea.netlify.app/'
+                    }
+                });
+                if (error) {
+                    console.error('구글 로그인 오류:', error);
+                    alert('구글 로그인 실패: ' + error.message);
                 }
-            });
-            if (error) {
-                alert('구글 로그인 실패: ' + error.message);
+            } catch (error) {
+                console.error('구글 로그인 예외:', error);
+                alert('구글 로그인 중 오류가 발생했습니다.');
             }
-            // 로그인 성공 시, Supabase가 자동으로 리다이렉트합니다.
+        }
+
+        // 페이지 로드 시(또는 로그인 후) 세션 및 사용자 정보 확인
+        async function handleGoogleLoginResult() {
+            if (!supabase) {
+                supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+            }
+            const { data: { session }, error } = await supabase.auth.getSession();
+            if (error) {
+                console.error('세션 정보 가져오기 오류:', error);
+                return;
+            }
+            if (session && session.user) {
+                // 사용자 정보 활용 예시
+                const user = session.user;
+                console.log('구글 로그인 성공! 사용자 정보:', user);
+
+                // 예시: 이메일을 teacherId로 사용
+                teacherId = user.email;
+                localStorage.setItem(STORAGE_KEYS.TEACHER_ID, teacherId);
+
+                // UI 업데이트 및 데이터 로드
+                document.getElementById('configModal').style.display = 'none';
+                document.getElementById('noConnection').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('teacherInfo').textContent = `👨‍🏫 ${user.email}`;
+
+                // 체크리스트 및 학생 데이터 로드
+                await loadChecklists();
+                await loadStudents();
+            }
         }
     </script>
 </body>
