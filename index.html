@@ -671,6 +671,10 @@
         // 완전 로그아웃 및 초기화
         function resetUserId() {
             if (confirm('로그아웃 하시겠습니까?\n저장된 모든 정보가 삭제됩니다.')) {
+                // 구글 로그아웃 추가
+                if (supabase) {
+                    supabase.auth.signOut();
+                }
                 // localStorage.removeItem(STORAGE_KEYS.USER_ID); // 제거
                 localStorage.removeItem(STORAGE_KEYS.TEACHER_ID);
                 localStorage.removeItem(STORAGE_KEYS.LAST_VIEWED);
@@ -2079,6 +2083,12 @@
 
         // 페이지 로드 시(또는 로그인 후) 세션 및 사용자 정보 확인
         async function handleGoogleLoginResult() {
+            // 로컬스토리지에 이미 교사 ID가 있으면 구글 로그인 처리하지 않음
+            const savedTeacherId = localStorage.getItem(STORAGE_KEYS.TEACHER_ID);
+            if (savedTeacherId && savedTeacherId.trim() !== '') {
+                console.log('로컬 교사 ID가 있으므로 구글 로그인 무시:', savedTeacherId);
+                return;
+            }
             if (!supabase) {
                 supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
             }
