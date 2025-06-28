@@ -678,6 +678,7 @@
                 // localStorage.removeItem(STORAGE_KEYS.USER_ID); // 제거
                 localStorage.removeItem(STORAGE_KEYS.TEACHER_ID);
                 localStorage.removeItem(STORAGE_KEYS.LAST_VIEWED);
+                localStorage.removeItem('googleAuthEmail'); // 구글 인증 이메일도 제거
                 // localStorage.removeItem(STORAGE_KEYS.STUDENT_COUNT); // 이제 사용되지 않음
                 // 전역 변수 초기화
                 teacherId = null;
@@ -686,6 +687,10 @@
                 currentChecklistId = null;
                 students = [];
                 uploadedStudents = [];
+                
+                // UI 상태 초기화
+                resetUIState();
+                
                 alert('로그아웃되었습니다. 페이지를 새로고침합니다.');
                 location.reload();
             }
@@ -736,6 +741,20 @@
 
             try {
                 showSyncStatus('syncing', '로그인 중...');
+                
+                // 먼저 구글 세션 정리
+                if (supabase) {
+                    await supabase.auth.signOut();
+                }
+                
+                // 기존 데이터 완전 초기화
+                checklists = [];
+                currentChecklistId = null;
+                students = [];
+                uploadedStudents = [];
+                
+                // UI 상태 초기화
+                resetUIState();
                 
                 // 고정된 Supabase 설정으로 클라이언트 생성
                 if (!supabase) {
@@ -2052,9 +2071,24 @@
         }
 
         async function googleLogin() {
+            // 먼저 기존 데이터 완전 초기화
+            teacherId = null;
+            checklists = [];
+            currentChecklistId = null;
+            students = [];
+            uploadedStudents = [];
+            localStorage.removeItem(STORAGE_KEYS.TEACHER_ID);
+            localStorage.removeItem(STORAGE_KEYS.LAST_VIEWED);
+            
+            // UI 상태 초기화
+            resetUIState();
+            
             if (!supabase) {
                 supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
             }
+            
+            // 기존 세션 정리
+            await supabase.auth.signOut();
             
             try {
                 console.log('🔍 구글 로그인 시작');
@@ -2089,6 +2123,7 @@
                 console.log('로컬 교사 ID가 있으므로 구글 로그인 무시:', savedTeacherId);
                 return;
             }
+            
             if (!supabase) {
                 supabase = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
             }
@@ -2098,12 +2133,23 @@
                 return;
             }
             if (session && session.user) {
+                // 기존 teacherId 데이터 완전 초기화
+                localStorage.removeItem(STORAGE_KEYS.TEACHER_ID);
+                checklists = [];
+                currentChecklistId = null;
+                students = [];
+                
+                // UI 상태 초기화
+                resetUIState();
+                
                 // 사용자 정보 활용 예시
                 const user = session.user;
                 console.log('구글 로그인 성공! 사용자 정보:', user);
 
                 // 예시: 이메일을 teacherId로 사용
                 teacherId = user.email;
+                // 구글 계정을 별도 키로 저장하여 구분
+                localStorage.setItem('googleAuthEmail', teacherId);
                 localStorage.setItem(STORAGE_KEYS.TEACHER_ID, teacherId);
 
                 // UI 업데이트 및 데이터 로드
@@ -2123,6 +2169,17 @@
                 // 현재 URL에서 쿼리스트링 제거
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
+        }
+
+        // UI 초기화 함수 추가 - 계정 전환 시 UI 상태도 완전 초기화
+        function resetUIState() {
+            document.getElementById('checklistActions').classList.add('hidden');
+            document.getElementById('statistics').classList.add('hidden');
+            document.getElementById('checklistContent').innerHTML = '';
+            document.getElementById('checklistTitle').value = '';
+            document.getElementById('checklistInfo').innerHTML = '';
+            document.getElementById('checklistList').innerHTML = '';
+            updateStudentDisplay();
         }
     </script>
 </body>
